@@ -9,3 +9,4 @@ pyLDAvis~=3.3.1
 ipython~=7.22.0
 SQLAlchemy==1.4.11
 tweepy==3.10.0
+pywhapbot==1.0.1

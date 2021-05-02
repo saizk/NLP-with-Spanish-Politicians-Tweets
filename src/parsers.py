@@ -1,6 +1,8 @@
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
+from urllib.parse import quote
+from pywhapbot import WhapBot
 
 
 def wiki_parser():
@@ -16,4 +18,18 @@ def wiki_parser():
 
     parties = df.get("Lista.1").to_list()
 
-    return list(zip(politics, parties))
+    # return list(zip(politics, parties))
+    return list(map(list, zip(politics, parties)))
+
+
+def search_twitter(politic):
+    url = f"https://twitter.com/search?q={quote(politic)}&src=typed_query&f=user"
+    bot = WhapBot("chrome")
+    bot.get(url)
+    a = input("Select the profile geoffrense: ")
+    if a.lower() == "none":
+        profile = None
+    else:
+        profile = bot.driver.current_url.split("/")[-1]
+    bot.quit()
+    return profile

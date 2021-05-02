@@ -12,7 +12,3 @@ class Twitter(object):
             auth.set_access_token(access_token_key, access_token_secret)
 
         self.api = tweepy.API(auth)
-
-
-
-
