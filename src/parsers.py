@@ -24,12 +24,11 @@ def wiki_parser():
 
 def search_twitter(politic):
     url = f"https://twitter.com/search?q={quote(politic)}&src=typed_query&f=user"
-    bot = WhapBot("chrome")
-    bot.get(url)
-    a = input("Select the profile geoffrense: ")
-    if a.lower() == "none":
-        profile = None
-    else:
-        profile = bot.driver.current_url.split("/")[-1]
-    bot.quit()
-    return profile
+    with WhapBot("chrome") as bot:
+        bot.get(url)
+        a = input("Select the profile geoffrense: ")
+        if a.lower() == "none":
+            twitter = None
+        else:
+            twitter = bot.driver.current_url.split("/")[-1]
+    return twitter

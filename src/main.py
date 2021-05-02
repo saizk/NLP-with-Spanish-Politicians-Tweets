@@ -13,14 +13,18 @@ from parsers import wiki_parser, search_twitter
 # ACCESS_TOKEN_KEY = os.environ.get("ACCESS_TOKEN_KEY")
 
 
+def create_politics(db, politics):
+    with db.begin():
+        for idx, (pol, party) in enumerate(politics):
+            models.create_politic(db, pol, party, search_twitter(pol))
+
+
 def main():
     session = models.init_db("sqlite:///example.db")
     politics = wiki_parser()
     pprint(politics)
     print(len(politics))
-    with session.begin():
-        for idx, (pol, party) in enumerate(politics[5:10]):
-            models.create_politic(session, politics[idx][0], politics[idx][1], search_twitter(pol))
+    create_politics(session, politics)
 
     # bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
 
