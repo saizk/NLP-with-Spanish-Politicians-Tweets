@@ -1,9 +1,7 @@
-import time
+import re
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from urllib.parse import quote
-from pywhapbot import WhapBot
 
 
 def wiki_parser():
@@ -21,4 +19,9 @@ def wiki_parser():
 
     # return list(zip(politics, parties))
     return list(map(list, zip(politics, parties)))
+
+
+def parse_tweet_text(text):
+    parsed_text = re.sub(r'http\S+', '', text.replace('\n', "")).strip()
+    return parsed_text
 

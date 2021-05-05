@@ -8,3 +8,6 @@ pyLDAvis~=3.3.1
 ipython~=7.22.0
 SQLAlchemy==1.4.11
 tweepy==3.10.0
+requests~=2.25.1
+beautifulsoup4~=4.9.3
+lxml~=4.6.3
