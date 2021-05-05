@@ -1,5 +1,5 @@
-
 import spacy
+import pandas as pd
 from spacy.lang.es.examples import sentences
 
 
@@ -58,7 +58,7 @@ HACER UN THRESHOLD MINIMO. NO ES NECESARIO PERO EL PROFE LO HACE Y LE GUSTARÁ.
 tweets_df = pd.DataFrame(" [!] dataframe con los lemmas y otros atributos, incluido el nlemmas"
                       "para iterar y poder sacar el threshold")
 
-lemmas_threshold = #
+# lemmas_threshold =
 tweets_df = tweets_df[tweets_df['nlemmas']>=lemmas_threshold]
 
 

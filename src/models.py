@@ -49,9 +49,9 @@ def save_tweet(db, tweet):
 
 
 def create_politic(db, name, party, twitter):
-    pol = db.query(Politic).filter_by(twitter=twitter).first()
+    pol = db.query(Politic).filter_by(politic_id=hash(name)).first()
     if pol is None:
-        pol = Politic(name=name, party=party, twitter=twitter)
+        pol = Politic(politic_id=hash(name), name=name, party=party, twitter=twitter)
         db.add(pol)
 
 
@@ -83,6 +83,7 @@ class Tweet(Model):
 
 class Politic(Model):
     id = sq.Column(sq.Integer, primary_key=True)
+    politic_id = sq.Column(sq.Integer, nullable=False)
     name = sq.Column(sq.String, nullable=False)
     party = sq.Column(sq.String(128), nullable=False)
     twitter = sq.Column(sq.String(128))

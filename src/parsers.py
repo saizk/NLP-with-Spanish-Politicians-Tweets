@@ -1,3 +1,4 @@
+import time
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -21,14 +22,3 @@ def wiki_parser():
     # return list(zip(politics, parties))
     return list(map(list, zip(politics, parties)))
 
-
-def search_twitter(politic):
-    url = f"https://twitter.com/search?q={quote(politic)}&src=typed_query&f=user"
-    with WhapBot("chrome") as bot:
-        bot.get(url)
-        a = input("Select the profile geoffrense: ")
-        if a.lower() == "none":
-            twitter = None
-        else:
-            twitter = bot.driver.current_url.split("/")[-1]
-    return twitter
