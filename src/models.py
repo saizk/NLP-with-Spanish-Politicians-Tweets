@@ -3,6 +3,8 @@ from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
 from util import classproperty
 from datetime import datetime
+from parsers import parse_tweet_text
+
 
 Model = declarative_base()
 Model.__tablename__ = classproperty(lambda o: o.__name__.lower())
@@ -19,15 +21,15 @@ def init_db(db_uri):
 
 def save_tweet(db, tweet):
     tweet_hash = hash(tweet.id)
-    db_tweet = db.query(Tweet).filter_by(twitter_id=tweet_hash).first()
+    db_tweet = db.query(Tweet).filter_by(tweet_id=tweet_hash).first()
     if db_tweet is None:
         db_tweet = Tweet(
             tweet_id=tweet_hash,
-            # author=get_or_create_user(db, tweet.author),
-            text=tweet.text,
-            retweets=tweet.retweets,
-            favs=tweet.favs,
-            created_at=datetime.fromtimestamp(float(tweet.created_utc)),
+            author_id=get_politic(db, tweet.user.screen_name).id,
+            text=parse_tweet_text(tweet.full_text),
+            retweets=tweet.retweet_count,
+            favs=tweet.favorite_count,
+            created_at=tweet.created_at,
         )
         db.add(db_tweet)
 
@@ -37,6 +39,16 @@ def create_politic(db, name, party, twitter):
     if pol is None:
         pol = Politic(politic_id=hash(name), name=name, party=party, twitter=twitter)
         db.add(pol)
+
+
+def get_politic(db, twitter):
+    politic = db.query(Politic).filter_by(twitter=twitter).first()
+    return politic
+
+
+def get_party(db, twitter):
+    politic = get_politic(db, twitter)
+    return politic.party
 
 
 class Tweet(Model):
@@ -49,7 +61,6 @@ class Tweet(Model):
 
     created_at = sq.Column(sq.DateTime, nullable=False)
     author_id = sq.Column(sq.Integer, sq.ForeignKey('politic.id'), nullable=False)
-    # party = sq.Column(sq.String, sq.ForeignKey('politic.party'), nullable=False)
 
 
 class Politic(Model):

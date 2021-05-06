@@ -93,16 +93,3 @@ tweets_corpus_bow = [token_dic.doc2bow(doc) for doc in tweets_corpus]
 
 # 3. INITIAL TOPIC MODEL
 
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -16,13 +16,22 @@ from parsers import wiki_parser
 def create_politics(db, politics, bot):
     for idx, (pol, party) in enumerate(politics):
         users = bot.api.search_users(pol)
+        twitter = None
         if users:
-            twitter = users[0].screen_name
-        else:
-            twitter = None
-        print(f"{idx}:  {pol} -> {twitter}")
+            if users[0].followers_count > 50:
+                twitter = users[0].screen_name
+        print(f"{idx + 1}:  {pol} -> {twitter}")
         with db.begin():
             models.create_politic(db, pol, party, twitter)
+
+
+def create_tweets(db, twitters, bot):
+    for idx, twitter in enumerate(twitters):
+        tweets = bot.get_tweets_by_user(user=twitter, since=0, until=10)
+        print(f"{idx + 1}: {twitter} -> {len(tweets)} tweets")
+        for tweet in tweets:
+            models.save_tweet(db, tweet)
+        db.commit()
 
 
 def main():
@@ -32,16 +41,12 @@ def main():
     # print(len(politics))
 
     bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
-    # create_politics(session, politics, bot)
+    create_politics(session, politics, bot)
 
     twitters = [username[0] for username in session.query(models.Politic.twitter).all() if username[0]]
     # pprint(twitters)
     # print(len(twitters))
-
-    result = bot.get_tweets_by_user(user=twitters[0], since=0, until=10)
-    pprint(result)
-    print(len(result))
-    # print(result.__dir__())
+    create_tweets(session, twitters, bot)
 
 
 if __name__ == "__main__":
