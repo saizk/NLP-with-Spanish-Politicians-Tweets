@@ -15,19 +15,18 @@ from parsers import wiki_parser
 
 def create_politics(db, politics, bot):
     for idx, (pol, party) in enumerate(politics):
-        users = bot.api.search_users(pol)
+        users = bot.get_users_by_name(pol)
         twitter = None
-        if users:
-            if users[0].followers_count > 50:
-                twitter = users[0].screen_name
-        print(f"{idx + 1}:  {pol} -> {twitter}")
+        if users and users[0].followers_count > 50:
+            twitter = users[0].screen_name
+        print(f"{idx + 1}: {pol} -> {twitter}")
         with db.begin():
             models.create_politic(db, pol, party, twitter)
 
 
 def create_tweets(db, twitters, bot):
     for idx, twitter in enumerate(twitters):
-        tweets = bot.get_tweets_by_user(user=twitter, since=0, until=10)
+        tweets = bot.get_tweets_by_user(user=twitter, since=0, until=20)
         print(f"{idx + 1}: {twitter} -> {len(tweets)} tweets")
         for tweet in tweets:
             models.save_tweet(db, tweet)

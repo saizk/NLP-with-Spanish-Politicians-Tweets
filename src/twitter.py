@@ -15,6 +15,9 @@ class Twitter(object):
 
         self.api = tweepy.API(auth,  retry_count=5, wait_on_rate_limit=True)
 
+    def get_users_by_name(self, user: str):
+        return self.api.search_users(user)
+
     def get_tweets_by_user(self, user: str, since: int, until: int):
         page = 1
         parsed_tweets = []
