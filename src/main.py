@@ -26,7 +26,7 @@ def create_politics(db, politics, bot):
 
 def create_tweets(db, twitters, bot):
     for idx, twitter in enumerate(twitters):
-        tweets = bot.get_tweets_by_user(user=twitter, since=0, until=20)
+        tweets = bot.get_tweets_by_user(user=twitter, since=0, until=30)
         print(f"{idx + 1}: {twitter} -> {len(tweets)} tweets")
         for tweet in tweets:
             models.save_tweet(db, tweet)
