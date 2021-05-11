@@ -24,6 +24,13 @@ def wiki_parser():
 
 
 def remove_urls(text):
-    parsed_text = re.sub(r'http\S+', '', text.replace('\n', "")).strip()
-    return parsed_text
+    return re.sub(r'http\S+', '', text.replace('\n', "")).strip()
+
+
+def remove_hashtag(text):
+    return re.sub(r'#', '', text).strip()
+
+
+def remove_at_sign(text):
+    return re.sub(r'@', '', text).strip()
 

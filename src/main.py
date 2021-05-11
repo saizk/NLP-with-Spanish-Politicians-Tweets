@@ -21,14 +21,6 @@ def create_politics(db, politics, bot):
             models.create_politic(db, pol, party, twitter)
 
 
-def create_parties(db, parties, bot):
-    for idx, party in enumerate(parties):
-        twitter = bot.get_twitter_by_name(party, min_followers=20)
-        print(f"{idx + 1}: {party} -> {twitter}")
-        with db.begin():
-            models.create_party(db, party, twitter)
-
-
 def create_tweets(db, twitters, bot):
     for idx, twitter in enumerate(twitters):
         tweets = bot.get_tweets_by_user(user=twitter, since=0, until=30)
@@ -47,13 +39,12 @@ def main():
     # print(len(parties))  # 24
 
     bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
-    create_politics(session, politics, bot)
-    create_parties(session, parties, bot)
+    # create_politics(session, politics, bot)
 
     twitters = [username[0] for username in session.query(models.Politic.twitter).all() if username[0]]
     # pprint(twitters)
     # print(len(twitters))  # 291
-    create_tweets(session, twitters, bot)
+    # create_tweets(session, twitters, bot)
 
 
 if __name__ == "__main__":

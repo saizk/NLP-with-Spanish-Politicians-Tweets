@@ -28,15 +28,6 @@ def create_politic(db, name, party, twitter):
         db.add(pol)
 
 
-def create_party(db, party, twitter):
-    pol_party = db.query(Party).filter_by(party_id=hash(party)).first()
-    if pol_party is None:
-        pol_party = Party(
-            name=party, twitter=twitter, party_id=hash(party)
-        )
-        db.add(party)
-
-
 def save_tweet(db, tweet):
     db_tweet = db.query(Tweet).filter_by(tweet_id=hash(tweet.id)).first()
     if db_tweet is None:
@@ -80,10 +71,3 @@ class Politic(Model):
     tweets = orm.relationship("Tweet",
                               backref="politic",
                               cascade="all, delete-orphan")
-
-
-class Party(Model):
-    id = sq.Column(sq.Integer, primary_key=True)
-    name = sq.Column(sq.String, nullable=False)
-    twitter = sq.Column(sq.String(128))
-    party_id = sq.Column(sq.Integer, nullable=False)  # hash

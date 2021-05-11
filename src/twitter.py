@@ -25,6 +25,9 @@ class Twitter(object):
             twitter = users[0].screen_name
         return twitter
 
+    def get_followers(self, user: str, count: int = 100):
+        return self.api.followers(user, count)
+
     def get_tweets_by_user(self, user: str, since: int, until: int):
         page = 1
         parsed_tweets = []
