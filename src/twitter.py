@@ -18,6 +18,13 @@ class Twitter(object):
     def get_users_by_name(self, user: str, count: int = 5):
         return self.api.search_users(user, count=count)
 
+    def get_twitter_by_name(self, user: str, min_followers: int = 50):
+        users = self.get_users_by_name(user)
+        twitter = None
+        if users and users[0].followers_count > min_followers:
+            twitter = users[0].screen_name
+        return twitter
+
     def get_tweets_by_user(self, user: str, since: int, until: int):
         page = 1
         parsed_tweets = []

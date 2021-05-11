@@ -1,7 +1,8 @@
 import spacy
 import pandas as pd
 from spacy.lang.es.examples import sentences
-
+from gensim.models.phrases import Phrases
+from gensim.corpora import Dictionary
 
 " [!] DEBERIAMOS TENER EN ESTE PUNTO YA EL CORPUS EN FORMATO .XML"
 
@@ -9,8 +10,7 @@ gpu = False
 if gpu:
     nlp = spacy.load('es_dep_news_trf')
 else:
-    nlp = spacy.load('en_core_web_sm')
-
+    nlp = spacy.load('es_core_news_md')
 
 # 1. PRE-PROCESSING PIPELINE
 
@@ -21,6 +21,7 @@ We will keep the Name Entity Recognition, since politicians are likely to mentio
 """
 
 nlp.disable_pipe('parser')
+nlp.disable_pipe('ner')
 
 # We will only keep words whose morphological category is one of these.
 # The rest do not provide relevant information
@@ -34,7 +35,7 @@ def text_preprocessing(rawtext):
     """
     doc = nlp(rawtext)
     lemmatized = ' '.join([token.lemma_ for token in doc if
-                           (token.is_alpha == True) and (token.pos_ in valid_POS) and (not token.is_stop)])
+                           (token.is_alpha is True) and (token.pos_ in valid_POS) and (not token.is_stop)])
     return lemmatized
 
 
@@ -49,21 +50,16 @@ We have now transformed the raw text of the content of all the tweets into a lis
 of articles, which themselves contain a collection of the lemmas
 """
 
-
 """
 [!]  OJO PIOJO GEOFFRENSES: AQUI TENEMOS QUE CALCULAR CUÁNTOS LEMMAS CONTIENE CADA TWEET PARA
 HACER UN THRESHOLD MINIMO. NO ES NECESARIO PERO EL PROFE LO HACE Y LE GUSTARÁ.
 """
 
 tweets_df = pd.DataFrame(" [!] dataframe con los lemmas y otros atributos, incluido el nlemmas"
-                      "para iterar y poder sacar el threshold")
+                         "para iterar y poder sacar el threshold")
 
 # lemmas_threshold =
-tweets_df = tweets_df[tweets_df['nlemmas']>=lemmas_threshold]
-
-
-
-
+tweets_df = tweets_df[tweets_df['nlemmas'] >= lemmas_threshold]
 
 # 2. BAG OF WORDS REPRESENTATION
 
@@ -76,20 +72,19 @@ tweets_corpus = [el.split() for el in tweets_corpus]
 As we have previously pre-processed the corpus with spacy, a very simple N-Gram detection
 will be performed.
 """
+
 phrase_model = Phrases(tweets_corpus, min_count=2, threshold=20)
 tweets_corpus = [el for el in phrase_model[tweets_corpus]]
 
 # Token dictionary
-token_dic = gensim.corpora.Dictionary(tweets_corpus)
+
+token_dic = Dictionary(tweets_corpus)
 
 # Filter token dictionary
-no_below = 5 #Minimum number of documents to keep a term in the dictionary
-no_above = .4 #Maximum proportion of documents in which a term can appear to be kept in the dictionary
+no_below = 5  # Minimum number of documents to keep a term in the dictionary
+no_above = .4  # Maximum proportion of documents in which a term can appear to be kept in the dictionary
 
 # BOW: Transform list of tokens into list of tuples (token id, token # of occurrences)
 tweets_corpus_bow = [token_dic.doc2bow(doc) for doc in tweets_corpus]
 
-
-
 # 3. INITIAL TOPIC MODEL
-

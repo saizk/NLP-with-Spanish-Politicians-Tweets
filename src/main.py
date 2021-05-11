@@ -15,13 +15,18 @@ from parsers import wiki_parser
 
 def create_politics(db, politics, bot):
     for idx, (pol, party) in enumerate(politics):
-        users = bot.get_users_by_name(pol)
-        twitter = None
-        if users and users[0].followers_count > 50:
-            twitter = users[0].screen_name
+        twitter = bot.get_twitter_by_name(pol)
         print(f"{idx + 1}: {pol} -> {twitter}")
         with db.begin():
             models.create_politic(db, pol, party, twitter)
+
+
+def create_parties(db, parties, bot):
+    for idx, party in enumerate(parties):
+        twitter = bot.get_twitter_by_name(party, min_followers=20)
+        print(f"{idx + 1}: {party} -> {twitter}")
+        with db.begin():
+            models.create_party(db, party, twitter)
 
 
 def create_tweets(db, twitters, bot):
@@ -35,16 +40,19 @@ def create_tweets(db, twitters, bot):
 
 def main():
     session = models.init_db("sqlite:///example.db")
-    politics = wiki_parser()
+    politics, parties = wiki_parser()
     # pprint(politics)
-    # print(len(politics))
+    # print(len(politics))  # 350
+    # pprint(parties)
+    # print(len(parties))  # 24
 
     bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
     create_politics(session, politics, bot)
+    create_parties(session, parties, bot)
 
     twitters = [username[0] for username in session.query(models.Politic.twitter).all() if username[0]]
     # pprint(twitters)
-    # print(len(twitters))
+    # print(len(twitters))  # 291
     create_tweets(session, twitters, bot)
 
 

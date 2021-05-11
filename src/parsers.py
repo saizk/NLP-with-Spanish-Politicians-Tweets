@@ -10,18 +10,20 @@ def wiki_parser():
     table = soup.find("table", {"class": "wikitable sortable"})
     df = pd.DataFrame(pd.read_html(str(table))[0])
 
-    politics = df.get("Nombre y apellidos").to_list()
-    for idx, pol in enumerate(politics):
+    politics_names = df.get("Nombre y apellidos").to_list()
+    for idx, pol in enumerate(politics_names):
         surname, name = pol.split(",")
-        politics[idx] = f"{name} {surname}".strip()
+        politics_names[idx] = f"{name} {surname}".strip()
 
     parties = df.get("Lista.1").to_list()
 
-    # return list(zip(politics, parties))
-    return list(map(list, zip(politics, parties)))
+    politics = list(zip(politics_names, parties))
+    parties = set(parties)
+
+    return politics, parties
 
 
-def parse_tweet_text(text):
+def remove_urls(text):
     parsed_text = re.sub(r'http\S+', '', text.replace('\n', "")).strip()
     return parsed_text
 
