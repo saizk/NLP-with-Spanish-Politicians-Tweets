@@ -135,3 +135,5 @@ workflow.yml
 /chrome
 /firefox
 /brave
+
+*.ipynb

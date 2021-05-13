@@ -18,29 +18,36 @@ class Twitter(object):
     def get_users_by_name(self, user: str, count: int = 5):
         return self.api.search_users(user, count=count)
 
-    def get_twitter_by_name(self, user: str, min_followers: int = 50):
+    def get_twitter_by_name(self, user: str, min_followers: int = 50, is_verified: bool = False):
         users = self.get_users_by_name(user)
         twitter = None
-        if users and users[0].followers_count > min_followers:
-            twitter = users[0].screen_name
+        if users:
+            for user in users:
+                verify_cond = (user.verified == is_verified) if is_verified else True
+                if user.followers_count > min_followers and verify_cond:
+                    twitter = user.screen_name
+                    break
         return twitter
 
-    def get_followers(self, user: str, count: int = 100):
-        return self.api.followers(user, count)
+    def get_followers(self, user: str, count: int = 100, **kwargs):
+        return self.api.followers(screen_name=user, count=count, **kwargs)
 
-    def get_tweets_by_user(self, user: str, since: int, until: int):
+    def get_user_timeline(self, user: str, page: int = 1, tweet_mode="extended", **kwargs):
+        return self.api.user_timeline(user, page=page, tweet_mode=tweet_mode, **kwargs)
+
+    def get_tweets_by_user(self, user: str, since: int = 0, until: int = 30, last_n_months: int = 1):
         page = 1
         parsed_tweets = []
         while True:
-            tweets = self.api.user_timeline(user, page=page, tweet_mode="extended")
+            tweets = self.get_user_timeline(user, page=page)
             for tweet in tweets:
                 tweet_day = (datetime.datetime.now() - tweet.created_at).days
 
-                if since <= tweet_day < until:
+                if since <= tweet_day < last_n_months * until:
                     if (not tweet.retweeted) and ('RT @' not in tweet.full_text):
                         parsed_tweets.append(tweet)
 
-                elif tweet_day > until:
+                elif tweet_day > last_n_months * until:
                     return parsed_tweets
                 # elif tweet_day < since:
                 #     pass

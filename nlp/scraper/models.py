@@ -1,9 +1,8 @@
 import sqlalchemy as sq
 from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
-from util import classproperty
-from datetime import datetime
-from parsers import remove_urls
+from .util import classproperty
+from nlp.scraper.parsers import remove_urls
 
 Model = declarative_base()
 Model.__tablename__ = classproperty(lambda o: o.__name__.lower())
@@ -15,7 +14,8 @@ def init_db(db_uri):
     session = orm.scoped_session(orm.sessionmaker(bind=engine))
     Tweet.__table__.create(bind=engine, checkfirst=True)
     Politic.__table__.create(bind=engine, checkfirst=True)
-    return session
+    Party.__table__.create(bind=engine, checkfirst=True)
+    return session, engine
 
 
 def create_politic(db, name, party, twitter):
@@ -26,6 +26,15 @@ def create_politic(db, name, party, twitter):
             twitter=twitter, politic_id=hash(name)
         )
         db.add(pol)
+
+
+def create_party(db, party, twitter):
+    pol_party = db.query(Party).filter_by(name=party).first()
+    if pol_party is None:
+        pol_party = Party(
+            name=party, twitter=twitter, party_id=hash(party)
+        )
+        db.add(pol_party)
 
 
 def save_tweet(db, tweet):
@@ -71,3 +80,11 @@ class Politic(Model):
     tweets = orm.relationship("Tweet",
                               backref="politic",
                               cascade="all, delete-orphan")
+
+
+class Party(Model):
+    id = sq.Column(sq.Integer, primary_key=True)
+    name = sq.Column(sq.String, nullable=False)
+    twitter = sq.Column(sq.String(128))
+    party_id = sq.Column(sq.Integer, nullable=False)  # hash
+
