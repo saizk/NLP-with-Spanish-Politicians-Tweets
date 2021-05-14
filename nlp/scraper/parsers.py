@@ -67,9 +67,6 @@ def parse_tweet(tweet, mention_replaces):
 
 def parse_political_party_or_politician(text, replace_dict):
     return replace_dict.get(text, None)
-    # for name, accounts in replace_dict.items():
-    #     if text in map(str.lower, accounts):
-    #         return name
 
 
 def is_spanish(text):
