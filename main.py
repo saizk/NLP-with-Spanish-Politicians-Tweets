@@ -52,7 +52,8 @@ def nlp_pipeline_result():
     parsed_tweets_df = tweets_parser(tweets_df, labels_dict={**PARTIES, **twitters})
 
     nlp_tok = NLPTokenizer(parsed_tweets_df, disable_parser=False, disable_ner=False, gpu=False)
-    return nlp_tok.get_lemmas()
+    parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()
+    return parsed_tweets_df
 
 
 def main():
@@ -83,8 +84,9 @@ def main():
     print(parsed_tweets_df)
     print(f'Number of tweets in Spanish: {len(parsed_tweets_df["Parsed Tweets"])}')
     print("Pre-processing text with SpaCy ...")
-    lemmas_df = NLPTokenizer(raw_tweets_df).get_lemmas()
-    # print(lemmas_df)
+    nlp_tok = NLPTokenizer(raw_tweets_df)
+    parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()
+    print(parsed_tweets_df)
 
 
 if __name__ == "__main__":
