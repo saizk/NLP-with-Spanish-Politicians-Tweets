@@ -6,7 +6,7 @@ class NLPTokenizer(object):
 
     def_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
 
-    def __init__(self, raw_tweets: pd.DataFrame, valid_pos: set = None,
+    def __init__(self, tweets: pd.Series, valid_pos: set = None,
                  gpu: bool = False, disable_parser: bool = False, disable_ner: bool = False):
 
         if gpu:
@@ -18,8 +18,7 @@ class NLPTokenizer(object):
         if disable_ner:
             self.nlp.disable_pipe('ner')
 
-        self.raw_tweets = raw_tweets
-        self.tweets = self.raw_tweets["Parsed Tweets"]
+        self.tweets = tweets
         self.valid_pos = valid_pos if valid_pos else self.def_pos
 
     def get_lemmas(self):

@@ -4,7 +4,7 @@ from nlp.scraper.twitter import Twitter
 from nlp.scraper.parties import PARTIES
 from nlp.scraper.parsers import *
 from pprint import pprint
-from nlp.topicmodeling import NLPTokenizer #, nlp_pipeline
+from nlp.topicmodeling import NLPTokenizer
 
 
 # API_KEY = os.environ.get("API_KEY")
@@ -51,7 +51,12 @@ def nlp_pipeline_result():
     twitters = models.get_politics_twitter_dict(session)
     parsed_tweets_df = tweets_parser(tweets_df, labels_dict={**PARTIES, **twitters})
 
-    nlp_tok = NLPTokenizer(parsed_tweets_df, disable_parser=False, disable_ner=False, gpu=False)
+    nlp_tok = NLPTokenizer(
+        tweets=parsed_tweets_df["Parsed Tweets"],
+        disable_parser=False,
+        disable_ner=False,
+        gpu=False
+    )
     parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()
     return parsed_tweets_df
 
@@ -74,17 +79,16 @@ def main():
 
     # create_tweets(session, twitters, bot)
     raw_tweets_df = get_raw_tweets_df(engine)
-    print(raw_tweets_df)
+    # print(raw_tweets_df)
     print(f"Number of tweets of the politics during the last month: {len(raw_tweets_df.text)}")  # 18206
 
-    labels_dict = {**PARTIES, **twitters}
     print("Parsing incorrect and non-Spanish tweets ...")
-    parsed_tweets_df = tweets_parser(raw_tweets_df, labels_dict)
-    # pprint(parsed_tweets_df)
-    print(parsed_tweets_df)
+    parsed_tweets_df = tweets_parser(raw_tweets_df, labels_dict={**PARTIES, **twitters})
+    # print(parsed_tweets_df)
     print(f'Number of tweets in Spanish: {len(parsed_tweets_df["Parsed Tweets"])}')
+
     print("Pre-processing text with SpaCy ...")
-    nlp_tok = NLPTokenizer(raw_tweets_df)
+    nlp_tok = NLPTokenizer(raw_tweets_df["Parsed Tweets"])
     parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()
     print(parsed_tweets_df)
 
