@@ -39,8 +39,11 @@ def create_tweets(db, twitters, bot, last_n_months=1):
 
 def nlp_pipeline_result():
     session, engine = models.init_db("sqlite:///example.db")
+
+    twitters = models.get_politics_twitter_dict(session)
+    labels_dict = {**PARTIES, **twitters}
     tweets_df = pd.read_sql_table("tweet", con=engine)
-    parsed_tweets = tweets_parser(session, tweets_df)
+    parsed_tweets = tweets_parser(tweets_df, labels_dict)
 
     return nlp_pipeline(parsed_tweets)
 
@@ -63,13 +66,17 @@ def main():
 
     # create_tweets(session, twitters, bot)
     tweets_df = pd.read_sql_table("tweet", con=engine)
+    tweets_df["author"] = [politics[tweets_df["author_id"][i]][0] for i in tweets_df["author_id"]]
+    print(tweets_df)
     print(f"Number of tweets of the politics during the last month: {len(tweets_df.text)}")  # 18206
 
-    parsed_tweets = tweets_parser(session, tweets_df)
-    # pprint(parsed_tweets)
-    print(f"Number of tweets in Spanish: {len(parsed_tweets)}")
+    labels_dict = {**PARTIES, **twitters}
+    parsed_tweets_df = tweets_parser(tweets_df, labels_dict)
+    # pprint(parsed_tweets_df)
+    print(f"Number of tweets in Spanish: {len(parsed_tweets_df)}")
+    print(parsed_tweets_df)
     exit()
-    nlp_pipeline(parsed_tweets)
+    nlp_pipeline(parsed_tweets_df)
 
 
 if __name__ == "__main__":

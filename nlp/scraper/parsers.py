@@ -29,9 +29,8 @@ def wiki_parser():
     return politics, parties
 
 
-def tweets_parser(session, df):
+def tweets_parser(df, labels_dict):
     DetectorFactory.seed = 69420  # Seed for the language detector (deterministic)
-    labels_dict = {**PARTIES, **get_politics_twitter_dict(session)}
     with ProcessPoolExecutor(max_workers=cpu_count()) as pool:
         futures = [pool.submit(parse_tweet, tweet, mention_replaces=labels_dict) for tweet in df.text]
 
@@ -41,7 +40,9 @@ def tweets_parser(session, df):
         if result:
             parsed_tweets.append(result)
 
-    return parsed_tweets
+    tweets_df = pd.DataFrame(parsed_tweets, columns=["Parsed Tweets"])
+
+    return tweets_df
 
 
 def parse_tweet(tweet, mention_replaces):
