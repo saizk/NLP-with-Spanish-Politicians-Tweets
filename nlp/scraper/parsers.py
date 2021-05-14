@@ -7,8 +7,6 @@ from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor
 from pprint import pprint
 
-from .models import get_politics_twitter_dict
-from .parties import PARTIES
 from .util import traverse_dict
 
 
@@ -58,10 +56,11 @@ def parse_tweet(tweet, mention_replaces):
     for word in tweet.split(" "):
         if "@" in word:
             user = remove_symbols(word).lower()
-            word = parse_political_party_or_politician(user, mention_replaces) or user.capitalize()
-        parsed_tweet.append(
-            remove_underscore(remove_hashtag(word))
-        )
+            word = parse_political_party_or_politician(user, mention_replaces)
+        if word:
+            parsed_tweet.append(
+                remove_underscore(remove_hashtag(word))
+            )
     return " ".join(parsed_tweet)
 
 

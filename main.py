@@ -1,6 +1,7 @@
-from nlp.scraper import models
 from nlp.config import *
+from nlp.scraper import models
 from nlp.scraper.twitter import Twitter
+from nlp.scraper.parties import PARTIES
 from nlp.scraper.parsers import *
 from pprint import pprint
 from nlp.topicmodeling import nlp_pipeline
@@ -40,7 +41,7 @@ def create_tweets(db, twitters, bot, last_n_months=1):
 def get_raw_tweets_df(engine):
     politics, _ = wiki_parser()
     tweets_df = pd.read_sql_table("tweet", con=engine)
-    tweets_df["author"] = [politics[tweets_df["author_id"][i]][0] for i in tweets_df["author_id"]]
+    tweets_df["author"] = [politics[i-1][0] for i in tweets_df["author_id"]]
     return tweets_df
 
 
@@ -71,7 +72,8 @@ def main():
 
     # create_tweets(session, twitters, bot)
     raw_tweets_df = get_raw_tweets_df(engine)
-    # print(tweets_df)
+    print(raw_tweets_df)
+    exit()
     print(f"Number of tweets of the politics during the last month: {len(raw_tweets_df.text)}")  # 18206
 
     labels_dict = {**PARTIES, **twitters}
