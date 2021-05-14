@@ -16,7 +16,7 @@ def nlp_pipeline(tweets: list, gpu: bool = False):
     # nlp.disable_pipe('parser')
     nlp.disable_pipe('ner')
 
-    valid_pos = set(['VERB', 'NOUN', 'ADJ', 'PROPN'])
+    valid_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
 
     train, test = train_test_split(tweets, train_size=.2)
 
