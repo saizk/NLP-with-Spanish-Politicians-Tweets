@@ -73,7 +73,7 @@ def main():
     labels_dict = {**PARTIES, **twitters}
     parsed_tweets_df = tweets_parser(tweets_df, labels_dict)
     # pprint(parsed_tweets_df)
-    print(f"Number of tweets in Spanish: {len(parsed_tweets_df)}")
+    print(f'Number of tweets in Spanish: {len(parsed_tweets_df["Parsed Tweets"])}')
     print(parsed_tweets_df)
     exit()
     nlp_pipeline(parsed_tweets_df)

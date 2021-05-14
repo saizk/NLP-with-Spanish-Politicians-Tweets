@@ -5,9 +5,11 @@ from bs4 import BeautifulSoup
 from langdetect import detect, DetectorFactory
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor
+from pprint import pprint
 
 from .models import get_politics_twitter_dict
 from .parties import PARTIES
+from .util import traverse_dict
 
 
 def wiki_parser():
@@ -31,17 +33,19 @@ def wiki_parser():
 
 def tweets_parser(df, labels_dict):
     DetectorFactory.seed = 69420  # Seed for the language detector (deterministic)
+    traversed_dict = traverse_dict(labels_dict)
     with ProcessPoolExecutor(max_workers=cpu_count()) as pool:
-        futures = [pool.submit(parse_tweet, tweet, mention_replaces=labels_dict) for tweet in df.text]
+        futures = [
+            pool.submit(parse_tweet, tweet, mention_replaces=traversed_dict) for tweet in df.text
+        ]
 
     parsed_tweets = []
-    for future in futures:
+    for idx, future in enumerate(futures):
         result = future.result()
         if result:
-            parsed_tweets.append(result)
+            parsed_tweets.append((df.text[idx], result, df.author[idx], df.party[idx]))
 
-    tweets_df = pd.DataFrame(parsed_tweets, columns=["Parsed Tweets"])
-
+    tweets_df = pd.DataFrame(parsed_tweets, columns=["Original Tweets", "Parsed Tweets", "Author", "Party"])
     return tweets_df
 
 
@@ -62,9 +66,10 @@ def parse_tweet(tweet, mention_replaces):
 
 
 def parse_political_party_or_politician(text, replace_dict):
-    for name, accounts in replace_dict.items():
-        if text in map(str.lower, accounts):
-            return name
+    return replace_dict.get(text, None)
+    # for name, accounts in replace_dict.items():
+    #     if text in map(str.lower, accounts):
+    #         return name
 
 
 def is_spanish(text):
