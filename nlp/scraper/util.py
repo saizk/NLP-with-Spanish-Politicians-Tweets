@@ -1,5 +1,5 @@
 
-class classproperty(object):
+class classproperty(object):  #noqa
     def __init__(self, f):
         self.f = f
 
