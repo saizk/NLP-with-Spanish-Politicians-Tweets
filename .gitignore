@@ -136,4 +136,4 @@ workflow.yml
 /firefox
 /brave
 
-*.ipynb
+Session*.ipynb
