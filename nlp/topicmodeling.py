@@ -2,7 +2,7 @@ import spacy
 import pandas as pd
 
 
-class NLPTokenizer(object):
+class NLPPipeline(object):
 
     def_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
 
