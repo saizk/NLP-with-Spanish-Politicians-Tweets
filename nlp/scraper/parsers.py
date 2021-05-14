@@ -39,7 +39,9 @@ def tweets_parser(df, labels_dict):
 
     parsed_tweets = []
     for idx, future in enumerate(futures):
-        result = future.result()
+        result = None
+        if future:
+            result = future.result()
         if result:
             parsed_tweets.append((df.text[idx], result, df.author[idx], df.party[idx]))
 
@@ -57,11 +59,11 @@ def parse_tweet(tweet, mention_replaces):
         if "@" in word:
             user = remove_symbols(word).lower()
             word = parse_political_party_or_politician(user, mention_replaces)
-        if "#" in word:
+        elif "#" in word:
             word = remove_hashtag_word(word)
         if word:
             parsed_tweet.append(
-                remove_underscore(remove_hashtag(word))
+                remove_underscore(remove_hashtag(word,add_space=True))
             )
     return " ".join(parsed_tweet)
 

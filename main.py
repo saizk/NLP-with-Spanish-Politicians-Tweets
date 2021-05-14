@@ -4,7 +4,7 @@ from nlp.scraper.twitter import Twitter
 from nlp.scraper.parties import PARTIES
 from nlp.scraper.parsers import *
 from pprint import pprint
-from nlp.topicmodeling import nlp_pipeline, NLPTokenizer
+from nlp.topicmodeling import NLPTokenizer #, nlp_pipeline
 
 
 # API_KEY = os.environ.get("API_KEY")
