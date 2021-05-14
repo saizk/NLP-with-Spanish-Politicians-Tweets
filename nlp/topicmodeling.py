@@ -4,6 +4,7 @@ from spacy.lang.es.examples import sentences
 from gensim.models.phrases import Phrases
 from gensim.corpora import Dictionary
 from sklearn.model_selection import train_test_split
+from pprint import pprint
 
 
 def nlp_pipeline(tweets: list, gpu: bool = False):
@@ -21,10 +22,10 @@ def nlp_pipeline(tweets: list, gpu: bool = False):
 
     tweets = train
     tokens = get_tokens(tweets, nlp, valid_pos)
-    print(tokens)
-    exit()
+    pprint(tokens)
+
     tweets_lemmas = get_lemmas(tweets, nlp, valid_pos)
-    print(tweets_lemmas)
+    pprint(tweets_lemmas)
     tweets_df = pd.DataFrame(tweets, tweets_lemmas)
     print(tweets_df)
     # lemmas_threshold =

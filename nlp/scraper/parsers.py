@@ -63,7 +63,7 @@ def parse_political_party(text):
 
 
 def is_spanish(text):
-    parsed_text = remove_numbers(remove_symbols(text, spaces=True))
+    parsed_text = remove_numbers(remove_symbols(text, add_space=True))
     return detect(parsed_text) == "es" if parsed_text else False
 
 
@@ -71,20 +71,23 @@ def remove_urls(text):
     return re.sub(r'http\S+', '', text.replace('\n', "")).strip()
 
 
-def remove_underscore(text):
-    return re.sub(r'_', '', text).strip()
+def remove_underscore(text, add_space=False):
+    rep = ' ' if add_space else ''
+    return re.sub(r'_', rep, text).strip()
 
 
-def remove_hashtag(text):
-    return re.sub(r'#', '', text).strip()
+def remove_hashtag(text, add_space=False):
+    rep = ' ' if add_space else ''
+    return re.sub(r'#', rep, text).strip()
 
 
 def remove_hashtag_word(text):
     return re.sub(r'#\S+', '', text).strip()
 
 
-def remove_at_sign(text):
-    return re.sub(r'@', '', text).strip()
+def remove_at_sign(text, add_space=False):
+    rep = ' ' if add_space else ''
+    return re.sub(r'@', rep, text).strip()
 
 
 def remove_user_mention(text):
@@ -95,10 +98,10 @@ def remove_numbers(text):
     return re.sub(r'[0-9]', '', text).strip()
 
 
-def remove_symbols(text, spaces=False):
-    rep = ' ' if spaces else ''
+def remove_symbols(text, add_space=False):
+    rep = ' ' if add_space else ''
     return re.sub(r'[^\w]', rep, text).strip()
 
 
-def make_second_letter_capital(user_mention):
-    return user_mention[:1] + chr(ord(user_mention[1]) - 32*(ord(user_mention[1]) >= 97) + user_mention[2:])
+# def make_second_letter_capital(user_mention):
+#     return user_mention[:1] + chr(ord(user_mention[1]) - 32*(ord(user_mention[1]) >= 97) + user_mention[2:])

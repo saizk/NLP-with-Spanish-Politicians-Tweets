@@ -58,7 +58,7 @@ def main():
     print(f"Number of tweets of the politics during the last month: {len(tweets_df.text)}")  # 18206
 
     parsed_tweets = tweets_parser(tweets_df)
-    # pprint(parsed_tweets)
+    pprint(parsed_tweets)
     print(f"Number of tweets in Spanish: {len(parsed_tweets)}")
 
     nlp_pipeline(parsed_tweets)
