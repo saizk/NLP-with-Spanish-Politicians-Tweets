@@ -2,7 +2,6 @@ import sqlalchemy as sq
 from sqlalchemy import orm
 from sqlalchemy.ext.declarative import declarative_base
 from .util import classproperty
-from nlp.scraper.parsers import remove_urls
 
 Model = declarative_base()
 Model.__tablename__ = classproperty(lambda o: o.__name__.lower())
@@ -43,7 +42,7 @@ def save_tweet(db, tweet):
         politic = get_politic(db, tweet.user.screen_name)
         db_tweet = Tweet(
             party=politic.party,
-            text=remove_urls(tweet.full_text),
+            text=tweet.full_text,
             retweets=tweet.retweet_count,
             favs=tweet.favorite_count,
             created_at=tweet.created_at,
@@ -56,6 +55,14 @@ def save_tweet(db, tweet):
 def get_politic(db, twitter):
     politic = db.query(Politic).filter_by(twitter=twitter).first()
     return politic
+
+
+def get_politics_twitter_dict(db):
+    twitters = {
+        user[0]: twitter[0] for user, twitter in zip(db.query(Politic.name),
+                                                     db.query(Politic.twitter)) if twitter[0]
+    }
+    return twitters
 
 
 class Tweet(Model):

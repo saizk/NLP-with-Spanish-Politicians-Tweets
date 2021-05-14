@@ -2,10 +2,11 @@ import re
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from langdetect import detect
+from langdetect import detect, DetectorFactory
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor
 
+from .models import get_politics_twitter_dict
 from .parties import PARTIES
 
 
@@ -28,9 +29,11 @@ def wiki_parser():
     return politics, parties
 
 
-def tweets_parser(df):
+def tweets_parser(session, df):
+    DetectorFactory.seed = 69420  # Seed for the language detector (deterministic)
+    labels_dict = {**PARTIES, **get_politics_twitter_dict(session)}
     with ProcessPoolExecutor(max_workers=cpu_count()) as pool:
-        futures = [pool.submit(parse_tweet, tweet) for tweet in df.text]
+        futures = [pool.submit(parse_tweet, tweet, mention_replaces=labels_dict) for tweet in df.text]
 
     parsed_tweets = []
     for future in futures:
@@ -41,7 +44,8 @@ def tweets_parser(df):
     return parsed_tweets
 
 
-def parse_tweet(tweet):
+def parse_tweet(tweet, mention_replaces):
+    tweet = remove_urls(tweet)
     if not is_spanish(tweet):
         return None
 
@@ -49,17 +53,17 @@ def parse_tweet(tweet):
     for word in tweet.split(" "):
         if "@" in word:
             user = remove_symbols(word).lower()
-            word = parse_political_party(user) or user.capitalize()
+            word = parse_political_party_or_politician(user, mention_replaces) or user.capitalize()
         parsed_tweet.append(
             remove_underscore(remove_hashtag(word))
         )
     return " ".join(parsed_tweet)
 
 
-def parse_political_party(text):
-    for party, accounts in PARTIES.items():
+def parse_political_party_or_politician(text, replace_dict):
+    for name, accounts in replace_dict.items():
         if text in map(str.lower, accounts):
-            return party
+            return name
 
 
 def is_spanish(text):
@@ -101,7 +105,3 @@ def remove_numbers(text):
 def remove_symbols(text, add_space=False):
     rep = ' ' if add_space else ''
     return re.sub(r'[^\w]', rep, text).strip()
-
-
-# def make_second_letter_capital(user_mention):
-#     return user_mention[:1] + chr(ord(user_mention[1]) - 32*(ord(user_mention[1]) >= 97) + user_mention[2:])
