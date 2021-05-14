@@ -28,6 +28,7 @@ def nlp_pipeline(tweets: list, gpu: bool = False):
     pprint(tweets_lemmas)
     tweets_df = pd.DataFrame(tweets, tweets_lemmas)
     print(tweets_df)
+    return tweets_df
     # lemmas_threshold =
     # tweets_df = tweets_df[tweets_df['nlemmas'] >= lemmas_threshold]
 

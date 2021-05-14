@@ -36,6 +36,33 @@ def create_tweets(db, twitters, bot, last_n_months=1):
             models.save_tweet(db, tweet)
         db.commit()
 
+def nlp_pipeline_result():
+    session, engine = models.init_db("sqlite:///example.db")
+    politics, parties = wiki_parser()
+
+    # pprint(politics)
+    # create_politics(session, politics, bot)
+    #print(f"Number of politics in the Congress: {len(politics)}")  # 350
+
+    # pprint(parties)
+    # create_parties(session, PARTIES)
+    #print(f"Number of political parties: {len(parties)}")  # 24
+
+    bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
+    twitters = [username[0] for username in session.query(models.Politic.twitter).all() if username[0]]
+    # pprint(twitters)
+    #print(f"Number of politics with Twitter: {len(twitters)}")  # 292
+
+    # create_tweets(session, twitters, bot)
+    tweets_df = pd.read_sql_table("tweet", con=engine)
+    #print(f"Number of tweets of the politics during the last month: {len(tweets_df.text)}")  # 18206
+
+    parsed_tweets = tweets_parser(tweets_df)
+    # pprint(parsed_tweets)
+    #print(f"Number of tweets in Spanish: {len(parsed_tweets)}")
+
+    return nlp_pipeline(parsed_tweets)
+
 
 def main():
     session, engine = models.init_db("sqlite:///example.db")
@@ -58,7 +85,7 @@ def main():
     print(f"Number of tweets of the politics during the last month: {len(tweets_df.text)}")  # 18206
 
     parsed_tweets = tweets_parser(tweets_df)
-    pprint(parsed_tweets)
+    # pprint(parsed_tweets)
     print(f"Number of tweets in Spanish: {len(parsed_tweets)}")
 
     nlp_pipeline(parsed_tweets)
