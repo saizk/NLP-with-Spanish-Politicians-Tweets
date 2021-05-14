@@ -1,53 +1,45 @@
 import spacy
 import pandas as pd
-from spacy.lang.es.examples import sentences
-from gensim.models.phrases import Phrases
-from gensim.corpora import Dictionary
-from pprint import pprint
 
 
-def nlp_pipeline(tweets_df: pd.DataFrame, gpu: bool = False):
-    if gpu:
-        nlp = spacy.load('es_dep_news_trf')
-    else:
-        nlp = spacy.load('es_core_news_md')
+class NLPTokenizer(object):
 
-    # nlp.disable_pipe('parser')
-    nlp.disable_pipe('ner')
+    def_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
 
-    valid_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
+    def __init__(self, raw_tweets: pd.DataFrame, valid_pos: set = None,
+                 gpu: bool = False, disable_parser: bool = False, disable_ner: bool = False):
 
-    tweets = tweets_df["Parsed Tweets"]
-    # tokens = get_tokens(tweets, nlp, valid_pos)
-    # pprint(tokens)
+        if gpu:
+            self.nlp = spacy.load('es_dep_news_trf')
+        else:
+            self.nlp = spacy.load('es_core_news_md')
+        if disable_parser:
+            self.nlp.disable_pipe('parser')
+        if disable_ner:
+            self.nlp.disable_pipe('ner')
 
-    tweets_lemmas = get_lemmas(tweets, nlp, valid_pos)
-    tweets_df["Lemmas"] = tweets_lemmas
+        self.raw_tweets = raw_tweets
+        self.tweets = self.raw_tweets["Parsed Tweets"]
+        self.valid_pos = valid_pos if valid_pos else self.def_pos
 
-    return tweets_df
+    def get_lemmas(self):
+        return [self.text_preprocessing(tweet) for tweet in self.tweets]
 
+    def get_tokens(self):
+        return [self.text_tokenizer(tweet) for tweet in self.tweets]
 
-def get_lemmas(tweets, nlp, valid_pos):
-    return [text_preprocessing(nlp, tweet, valid_pos) for tweet in tweets]
+    def text_preprocessing(self, rawtext):
+        """
+        Implements tokenization, lemmatization and stopword removal from an input raw string
+        Returns the lemmatized string where lemmas are joined with a blank space
+        """
+        doc = self.nlp(rawtext)
+        lemmatized = ' '.join([token.lemma_ for token in doc if
+                               (token.is_alpha is True) and (token.pos_ in self.valid_pos) and (not token.is_stop)])
+        return lemmatized
 
-
-def get_tokens(tweets, nlp, valid_pos):
-    return [text_tokenizer(nlp, tweet, valid_pos) for tweet in tweets]
-
-
-def text_preprocessing(nlp, rawtext, valid_pos):
-    """
-    Implements tokenization, lemmatization and stopword removal from an input raw string
-    Returns the lemmatized string where lemmas are joined with a blank space
-    """
-    doc = nlp(rawtext)
-    lemmatized = ' '.join([token.lemma_ for token in doc if
-                           (token.is_alpha is True) and (token.pos_ in valid_pos) and (not token.is_stop)])
-    return lemmatized
-
-
-def text_tokenizer(nlp, rawtext, valid_pos):
-    doc = nlp(rawtext)
-    tokennized = ' '.join([token.text for token in doc if
-                           (token.is_alpha is True) and (token.pos_ in valid_pos) and (not token.is_stop)])
-    return tokennized
+    def text_tokenizer(self, rawtext):
+        doc = self.nlp(rawtext)
+        tokennized = ' '.join([token.text for token in doc if
+                               (token.is_alpha is True) and (token.pos_ in self.valid_pos) and (not token.is_stop)])
+        return tokennized

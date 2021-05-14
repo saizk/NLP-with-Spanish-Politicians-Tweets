@@ -57,6 +57,8 @@ def parse_tweet(tweet, mention_replaces):
         if "@" in word:
             user = remove_symbols(word).lower()
             word = parse_political_party_or_politician(user, mention_replaces)
+        if "#" in word:
+            word = remove_hashtag_word(word)
         if word:
             parsed_tweet.append(
                 remove_underscore(remove_hashtag(word))
