@@ -53,8 +53,8 @@ def nlp_pipeline_result():
 
     nlp_tok = NLPTokenizer(
         tweets=parsed_tweets_df["Parsed Tweets"],
-        disable_parser=False,
-        disable_ner=False,
+        disable_parser=True,
+        disable_ner=True,
         gpu=False
     )
     parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()

@@ -42,3 +42,33 @@ class NLPTokenizer(object):
         tokennized = ' '.join([token.text for token in doc if
                                (token.is_alpha is True) and (token.pos_ in self.valid_pos) and (not token.is_stop)])
         return tokennized
+
+
+
+# 2. BAG OF WORDS REPRESENTATION
+#
+# tweets_corpus = tweets_df.lemmas.tolist()
+# tweets_corpus = list(set(tweets_corpus))
+# tweets_corpus = [el.split() for el in tweets_corpus]
+#
+# # N-GRAM detection and replacement
+# """
+# As we have previously pre-processed the corpus with spacy, a very simple N-Gram detection
+# will be performed.
+# """
+#
+# phrase_model = Phrases(tweets_corpus, min_count=2, threshold=20)
+# tweets_corpus = [el for el in phrase_model[tweets_corpus]]
+#
+# # Token dictionary
+#
+# token_dic = Dictionary(tweets_corpus)
+#
+# # Filter token dictionary
+# no_below = 5  # Minimum number of documents to keep a term in the dictionary
+# no_above = .4  # Maximum proportion of documents in which a term can appear to be kept in the dictionary
+#
+# # BOW: Transform list of tokens into list of tuples (token id, token # of occurrences)
+# tweets_corpus_bow = [token_dic.doc2bow(doc) for doc in tweets_corpus]
+#
+# # 3. INITIAL TOPIC MODEL
