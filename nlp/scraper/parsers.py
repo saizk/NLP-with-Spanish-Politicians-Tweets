@@ -68,14 +68,12 @@ def parse_tweet(tweet, parse_func, mention_replaces):
         word = replace_party(word)
         if "@" in word:
             # replace twitter usernames by party or politician names
-            word = remove_full_stop_and_commas(word).lower()
-            word = replace_twitter_users(word, mention_replaces)
+            word = remove_full_stop_and_commas(remove_at_sign(word))
+            word = replace_twitter_users(word.lower(), mention_replaces)
         if "#" in word:
             word = parse_func(word)
         if word:
-            parsed_tweet.append(
-                remove_symbols(word, add_space=True)
-            )
+            parsed_tweet.append(word)
     return " ".join(parsed_tweet)
 
 
