@@ -48,7 +48,6 @@ def get_raw_tweets_df(engine):
 def nlp_pipeline_result(disable_parser: bool = True, disable_ner: bool = True, parameters: dict = None):
     session, engine = models.init_db("sqlite:///example.db")
     tweets_df = get_raw_tweets_df(engine)
-    # twitters = models.get_politics_twitter_dict(session)
     parsed_tweets_df = tweets_parser(
         tweets_df,
         parameters=parameters,
