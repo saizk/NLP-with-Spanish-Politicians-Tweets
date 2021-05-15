@@ -74,7 +74,7 @@ def parse_tweet(tweet, parse_hashtag_func, mention_replaces):
 
     parsed_tweet = []
     for word in tweet.split(" "):
-        word = replace_party(remove_symbols(word, add_space=True), TR_MAIN_PARTIES)
+        word = replace_party(remove_full_stop_and_commas(word), TR_MAIN_PARTIES)
         if "@" in word:
             # replace twitter usernames by party or politician names
             word = remove_full_stop_and_commas(remove_at_sign(word)).lower()
