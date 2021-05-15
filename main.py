@@ -1,7 +1,7 @@
 from nlp.config import *
 from nlp.scraper import models
 from nlp.scraper.twitter import Twitter
-from nlp.scraper.parties import PARTIES
+from nlp.scraper.parties import PARTIES_TWITTERS
 from nlp.scraper.parsers import *
 from pprint import pprint
 from nlp.topicmodeling import NLPPipeline
@@ -45,16 +45,24 @@ def get_raw_tweets_df(engine):
     return tweets_df
 
 
-def nlp_pipeline_result():
+def nlp_pipeline_result(disable_parser: bool = True, disable_ner: bool = True):
     session, engine = models.init_db("sqlite:///example.db")
     tweets_df = get_raw_tweets_df(engine)
-    twitters = models.get_politics_twitter_dict(session)
-    parsed_tweets_df = tweets_parser(tweets_df, labels_dict={**PARTIES, **twitters})
+    # twitters = models.get_politics_twitter_dict(session)
+    parsed_tweets_df = tweets_parser(
+        tweets_df,
+        parameters={
+            "remove_hashtags": True,
+            "replace_politics": True,
+            "replace_parties": True,
+        },
+        session=session,
+    )
 
     nlp_tok = NLPPipeline(
         tweets=parsed_tweets_df["Parsed Tweets"],
-        disable_parser=True,
-        disable_ner=True,
+        disable_parser=disable_parser,
+        disable_ner=disable_ner,
         gpu=False
     )
     parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()
@@ -69,12 +77,11 @@ def main():
     print(f"Number of politics in the Congress: {len(politics)}")  # 350
 
     # pprint(parties)
-    # create_parties(session, PARTIES)
+    # create_PARTIES_TWITTERS(session, PARTIES_TWITTERS)
     print(f"Number of political parties: {len(parties)}")  # 24
 
     bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
     twitters = models.get_politics_twitter_dict(session)
-    pprint(twitters)
     print(f"Number of politics with Twitter: {len(twitters)}")  # 292
 
     # create_tweets(session, twitters, bot)
@@ -83,8 +90,17 @@ def main():
     print(f"Number of tweets of the politics during the last month: {len(raw_tweets_df.text)}")  # 18206
 
     print("Parsing incorrect and non-Spanish tweets ...")
-    parsed_tweets_df = tweets_parser(raw_tweets_df, labels_dict={**PARTIES, **twitters})
-    # print(parsed_tweets_df)
+    parsed_tweets_df = tweets_parser(
+        raw_tweets_df,
+        parameters={
+            "remove_hashtag_word": True,
+            "replace_politics": True,
+            "replace_parties": True,
+        },
+        session=session,
+    )
+    print(parsed_tweets_df)
+    exit()
     print(f'Number of tweets in Spanish: {len(parsed_tweets_df["Parsed Tweets"])}')
 
     print("Pre-processing text with SpaCy ...")

@@ -7,6 +7,8 @@ from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor
 from pprint import pprint
 
+from .models import get_politics_twitter_dict
+from .parties import MAIN_PARTIES, PARTIES_TWITTERS, TR_MAIN_PARTIES
 from .util import traverse_dict
 
 
@@ -29,52 +31,81 @@ def wiki_parser():
     return politics, parties
 
 
-def tweets_parser(df, labels_dict):
+def tweets_parser(df, parameters: dict, session):
     DetectorFactory.seed = 69420  # Seed for the language detector (deterministic)
-    traversed_dict = traverse_dict(labels_dict)
+
+    parse_func, labels_dict = set_parameters(session, parameters)
+
     with ProcessPoolExecutor(max_workers=cpu_count()) as pool:
         futures = [
-            pool.submit(parse_tweet, tweet, mention_replaces=traversed_dict) for tweet in df.text
+            pool.submit(
+                parse_tweet, tweet,
+                parse_func, mention_replaces=labels_dict
+            )
+            for tweet in df.text
         ]
 
     parsed_tweets = []
     for idx, future in enumerate(futures):
-        result = None
-        if future:
-            result = future.result()
+        result = future.result()
         if result:
-            parsed_tweets.append((df.text[idx], result, df.author[idx], df.party[idx]))
+            parsed_tweets.append((df.text[idx], result, df.favs[idx], df.retweets[idx], df.author[idx], df.party[idx]))
 
-    tweets_df = pd.DataFrame(parsed_tweets, columns=["Original Tweets", "Parsed Tweets", "Author", "Party"])
+    tweets_df = pd.DataFrame(
+        parsed_tweets,
+        columns=["Original Tweets", "Parsed Tweets", "Likes", "Retweets", "Author", "Party"]
+    )
     return tweets_df
 
 
-def parse_tweet(tweet, mention_replaces):
+def parse_tweet(tweet, parse_func, mention_replaces):
     tweet = remove_urls(tweet)
     if not is_spanish(tweet):
         return None
 
     parsed_tweet = []
     for word in tweet.split(" "):
+        word = replace_party(word)
         if "@" in word:
-            user = remove_symbols(word).lower()
-            word = parse_political_party_or_politician(user, mention_replaces)
-        elif "#" in word:
-            word = remove_hashtag_word(word)
+            # replace twitter usernames by party or politician names
+            word = remove_symbols(word, add_space=False)
+            word = replace_twitter_users(word.lower(), mention_replaces)
+        if "#" in word:
+            word = parse_func(word)
         if word:
             parsed_tweet.append(
-                remove_underscore(remove_hashtag(word,add_space=True))
+                remove_underscore(word)
             )
     return " ".join(parsed_tweet)
 
 
-def parse_political_party_or_politician(text, replace_dict):
-    return replace_dict.get(text, None)
+def replace_twitter_users(text, replace_dict):
+    return replace_dict.get(text, '')
+
+
+def replace_party(word):
+    return TR_MAIN_PARTIES.get(word, word)
 
 
 def is_spanish(text):
     parsed_text = remove_numbers(remove_symbols(text, add_space=True))
     return detect(parsed_text) == "es" if parsed_text else False
+
+
+def set_parameters(session, parameters: dict):
+    labels_dict = {}
+    twitters_dict = get_politics_twitter_dict(session)
+
+    if parameters["remove_hashtag_word"]:
+        parse_func = remove_hashtag_word
+    else:
+        parse_func = remove_hashtag
+    if parameters["replace_politics"]:
+        labels_dict.update(twitters_dict)
+    if parameters["replace_parties"]:
+        labels_dict.update(PARTIES_TWITTERS)
+
+    return parse_func, traverse_dict(labels_dict)
 
 
 def remove_urls(text):
@@ -86,7 +117,7 @@ def remove_underscore(text, add_space=False):
     return re.sub(r'_', rep, text).strip()
 
 
-def remove_hashtag(text, add_space=False):
+def remove_hashtag(text, add_space=True):
     rep = ' ' if add_space else ''
     return re.sub(r'#', rep, text).strip()
 

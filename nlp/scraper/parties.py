@@ -1,27 +1,39 @@
+from .util import traverse_dict
 
-__all__ = ["PARTIES"]
+__all__ = ["MAIN_PARTIES", "PARTIES_TWITTERS"]
 
-PARTIES = {
-    "PSOE": ["PSOE", "gpscongreso"],
-    "PP": ["populares", "GPPopular", "pptenerife"],
-    "Ciudadanos": ["CiudadanosCs"],
-    "UnidasPodemos": ["PODEMOS"],
+
+MAIN_PARTIES = {
+    "PSOE": ["PSOE", "psoe"],
+    "PP": ["PP", "pp"],
+    "CiudadanosCs": ["Ciudadanos"],
+    "Unidas Podemos": ["Podemos"],
+    "Vox": ["VOX", "Vox", "vox"]
+}
+
+TR_MAIN_PARTIES = traverse_dict(MAIN_PARTIES)
+
+PARTIES_TWITTERS = {
+    "PSOE": ["psoe", "gpscongreso"],
+    "PP": ["populares", "gppopular"],
+    "CiudadanosCs": ["ciudadanoscs"],
+    "Unidas Podemos": ["podemos"],
     "Vox": ["vox_es"],
-    "NavarraSuma": ["navarrasuma_pna"],
-    "CoaliciónCanaria": ["coalicion"],
+    "Más País": ["maspais_es"],
+    "Navarra Suma": ["navarrasuma_pna"],
+    "EHBildu": ["ehbildu"],
+    "Esquerra Republicana": ["esquerra_erc"],
+    "Coalición Canaria": ["coalicion"],
     "BNG": ["obloque"],
-    "JxCAT": ["JuntsXCat"],
-    "EsquerraRepublicana": ["Esquerra_ERC"],
+    "JxCAT": ["juntsxcat"],
     "CUP-PR": ["cupnacional"],
     "PSC": ["socialistes_cat"],
     "PSE-EE-PSOE": ["socialistavasco"],
-    "PSdeG-PSOE": ["PSdeG"],
-    "EnComúPodem": ["EnComu_Podem"],
+    "PSdeG-PSOE": ["psdeg"],
+    "En Comú Podem": ["encomu_podem"],
     "MésCompromís": ["compromis"],
-    "TeruelExiste": ["TeruelExiste_"],
-    "MásPaís": ["MasPais_Es"],
+    "Teruel Existe": ["teruelexiste_"],
     "EAJ-PNV": ["eajpnv"],
     "PRC": ["prcantabria"],
-    "EHBildu": ["ehbildu"],
-    "EnComún": ["EnComun_Gal"]
+    "EnComún": ["encomun_gal"]
 }

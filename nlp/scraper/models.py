@@ -59,8 +59,8 @@ def get_politic(db, twitter):
 
 def get_politics_twitter_dict(db):
     twitters = {
-        user[0]: twitter[0] for user, twitter in zip(db.query(Politic.name),
-                                                     db.query(Politic.twitter)) if twitter[0]
+        user[0]: twitter[0].lower() for user, twitter in zip(db.query(Politic.name),
+                                                             db.query(Politic.twitter)) if twitter[0]
     }
     return twitters
 
