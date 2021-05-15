@@ -45,19 +45,18 @@ def get_raw_tweets_df(engine):
     return tweets_df
 
 
-def nlp_pipeline_result(disable_parser: bool = True, disable_ner: bool = True, parameters: dict = None):
+def nlp_pipeline_result(parser_parameters: dict = None, nlp_parameters: dict = None):
     session, engine = models.init_db("sqlite:///example.db")
     tweets_df = get_raw_tweets_df(engine)
     parsed_tweets_df = tweets_parser(
         tweets_df,
-        parameters=parameters,
+        parameters=parser_parameters,
         session=session,
     )
 
     nlp_tok = NLPPipeline(
         tweets=parsed_tweets_df["Parsed Tweets"],
-        disable_parser=disable_parser,
-        disable_ner=disable_ner,
+        parameters=nlp_parameters,
         gpu=False
     )
     parsed_tweets_df["Lemmas"] = nlp_tok.get_lemmas()

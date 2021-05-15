@@ -6,16 +6,16 @@ class NLPPipeline(object):
 
     def_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
 
-    def __init__(self, tweets: pd.Series, valid_pos: set = None,
-                 gpu: bool = False, disable_parser: bool = False, disable_ner: bool = False):
+    def __init__(self, tweets: pd.Series, valid_pos: set = None, parameters: dict = None, gpu: bool = False):
 
         if gpu:
             self.nlp = spacy.load('es_dep_news_trf')
         else:
             self.nlp = spacy.load('es_core_news_md')
-        if disable_parser:
+
+        if parameters["disable_parser"]:
             self.nlp.disable_pipe('parser')
-        if disable_ner:
+        if parameters["disable_ner"]:
             self.nlp.disable_pipe('ner')
 
         self.tweets = tweets
