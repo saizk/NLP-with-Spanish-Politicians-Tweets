@@ -132,8 +132,5 @@ dmypy.json
 config.py
 workflow.yml
 
-/chrome
-/firefox
-/brave
-
+*.zip
 Session*.ipynb
