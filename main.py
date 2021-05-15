@@ -94,8 +94,6 @@ def main():
         },
         session=session,
     )
-    print(parsed_tweets_df)
-    exit()
     print(f'Number of tweets in Spanish: {len(parsed_tweets_df["Parsed Tweets"])}')
 
     print("Pre-processing text with SpaCy ...")

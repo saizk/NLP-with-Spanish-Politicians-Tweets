@@ -11,6 +11,6 @@ def traverse_dict(original_dict):
     traversed = {}
     for name, accounts in original_dict.items():
         for account in accounts:
-            traversed[account.lower()] = name
+            traversed[account] = name
 
     return traversed

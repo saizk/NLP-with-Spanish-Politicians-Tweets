@@ -8,7 +8,7 @@ MAIN_PARTIES = {
     "PP": ["PP", "pp"],
     "CiudadanosCs": ["Ciudadanos"],
     "Unidas Podemos": ["Podemos"],
-    "Vox": ["VOX", "Vox", "vox"]
+    "Vox": ["VOX", "vox"]
 }
 
 TR_MAIN_PARTIES = traverse_dict(MAIN_PARTIES)
