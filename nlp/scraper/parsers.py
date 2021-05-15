@@ -68,13 +68,13 @@ def parse_tweet(tweet, parse_func, mention_replaces):
         word = replace_party(word)
         if "@" in word:
             # replace twitter usernames by party or politician names
-            word = remove_symbols(word, add_space=False)
-            word = replace_twitter_users(word.lower(), mention_replaces)
+            word = remove_full_stop_and_commas(word).lower()
+            word = replace_twitter_users(word, mention_replaces)
         if "#" in word:
             word = parse_func(word)
         if word:
             parsed_tweet.append(
-                remove_underscore(word)
+                remove_symbols(word, add_space=True)
             )
     return " ".join(parsed_tweet)
 
@@ -94,14 +94,12 @@ def is_spanish(text):
 
 def set_parameters(session, parameters: dict):
     labels_dict = {}
-    twitters_dict = get_politics_twitter_dict(session)
+    politics_twitters = get_politics_twitter_dict(session)
 
-    if parameters["remove_hashtag_word"]:
-        parse_func = remove_hashtag_word
-    else:
-        parse_func = remove_hashtag
+    parse_func = remove_hashtag_word if parameters["remove_hashtag_word"] else remove_hashtag
+
     if parameters["replace_politics"]:
-        labels_dict.update(twitters_dict)
+        labels_dict.update(politics_twitters)
     if parameters["replace_parties"]:
         labels_dict.update(PARTIES_TWITTERS)
 
@@ -110,6 +108,10 @@ def set_parameters(session, parameters: dict):
 
 def remove_urls(text):
     return re.sub(r'http\S+', '', text.replace('\n', "")).strip()
+
+
+def remove_full_stop_and_commas(text):
+    return re.sub(r'[, .]', '', text).strip()
 
 
 def remove_underscore(text, add_space=False):
