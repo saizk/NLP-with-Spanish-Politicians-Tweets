@@ -6,7 +6,7 @@ __all__ = ["MAIN_PARTIES", "PARTIES_TWITTERS"]
 MAIN_PARTIES = {
     "PSOE": ["PSOE", "psoe"],
     "PP": ["PP", "pp"],
-    "CiudadanosCs": ["Ciudadanos"],
+    "CiudadanosCs": ["Ciudadanos", "Cs", "cs"],
     "Unidas Podemos": ["Podemos"],
     "Vox": ["VOX", "vox"]
 }

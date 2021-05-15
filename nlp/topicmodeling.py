@@ -1,17 +1,27 @@
+import os
 import spacy
 import pandas as pd
 
 
 class NLPPipeline(object):
 
+    def_param = {"disable_parser": True, "disable_ner": True}
     def_pos = {'VERB', 'NOUN', 'ADJ', 'PROPN'}
 
     def __init__(self, tweets: pd.Series, valid_pos: set = None, parameters: dict = None, gpu: bool = False):
 
+        if not parameters:
+            parameters = self.def_param
         if gpu:
-            self.nlp = spacy.load('es_dep_news_trf')
+            self.model = 'es_dep_news_trf'
         else:
-            self.nlp = spacy.load('es_core_news_md')
+            self.model = 'es_core_news_md'
+
+        try:
+            self.nlp = spacy.load(self.model)
+        except OSError:
+            os.system(f"python -m spacy download {self.model}")
+            self.nlp = spacy.load(self.model)
 
         if parameters["disable_parser"]:
             self.nlp.disable_pipe('parser')

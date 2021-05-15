@@ -1,10 +1,11 @@
+import pandas as pd
 from nlp.config import *
 from nlp.scraper import models
 from nlp.scraper.twitter import Twitter
+from nlp.scraper.parsers import wiki_parser, tweets_parser
 from nlp.scraper.parties import PARTIES_TWITTERS
-from nlp.scraper.parsers import *
-from pprint import pprint
 from nlp.topicmodeling import NLPPipeline
+from pprint import pprint
 
 
 # API_KEY = os.environ.get("API_KEY")
@@ -38,6 +39,13 @@ def create_tweets(db, twitters, bot, last_n_months=1):
         db.commit()
 
 
+def create_database(db, twitter_bot: Twitter, politics: list):
+    create_politics(db, politics, twitter_bot)
+    create_parties(db, PARTIES_TWITTERS)
+    twitters = list(models.get_politics_twitter_dict(db).keys())
+    create_tweets(db, twitters, twitter_bot)
+
+
 def get_raw_tweets_df(engine):
     politics, _ = wiki_parser()
     tweets_df = pd.read_sql_table("tweet", con=engine)
@@ -53,7 +61,6 @@ def nlp_pipeline_result(parser_parameters: dict = None, nlp_parameters: dict = N
         parameters=parser_parameters,
         session=session,
     )
-
     nlp_tok = NLPPipeline(
         tweets=parsed_tweets_df["Parsed Tweets"],
         parameters=nlp_parameters,
@@ -66,19 +73,15 @@ def nlp_pipeline_result(parser_parameters: dict = None, nlp_parameters: dict = N
 def main():
     session, engine = models.init_db("sqlite:///example.db")
     politics, parties = wiki_parser()
+    bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
     # pprint(politics)
-    # create_politics(session, politics, bot)
     print(f"Number of politics in the Congress: {len(politics)}")  # 350
-
     # pprint(parties)
-    # create_PARTIES_TWITTERS(session, PARTIES_TWITTERS)
     print(f"Number of political parties: {len(parties)}")  # 24
 
-    bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
-    twitters = models.get_politics_twitter_dict(session)
-    print(f"Number of politics with Twitter: {len(twitters)}")  # 292
+    # create_database(session, bot, politics)
+    print(f"Number of politics with Twitter: {session.query(models.Politic.twitter).distinct().count()}")  # 293
 
-    # create_tweets(session, twitters, bot)
     raw_tweets_df = get_raw_tweets_df(engine)
     # print(raw_tweets_df)
     print(f"Number of tweets of the politics during the last month: {len(raw_tweets_df.text)}")  # 18206
