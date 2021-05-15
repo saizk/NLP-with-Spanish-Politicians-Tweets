@@ -45,17 +45,13 @@ def get_raw_tweets_df(engine):
     return tweets_df
 
 
-def nlp_pipeline_result(disable_parser: bool = True, disable_ner: bool = True):
+def nlp_pipeline_result(disable_parser: bool = True, disable_ner: bool = True, parameters: dict = None):
     session, engine = models.init_db("sqlite:///example.db")
     tweets_df = get_raw_tweets_df(engine)
     # twitters = models.get_politics_twitter_dict(session)
     parsed_tweets_df = tweets_parser(
         tweets_df,
-        parameters={
-            "remove_hashtags": True,
-            "replace_politics": True,
-            "replace_parties": True,
-        },
+        parameters=parameters,
         session=session,
     )
 
