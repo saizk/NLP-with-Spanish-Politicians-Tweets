@@ -74,11 +74,11 @@ def parse_tweet(tweet, parse_hashtag_func, mention_replaces):
 
     parsed_tweet = []
     for word in tweet.split(" "):
-        word = replace_party(remove_full_stop_and_commas(word), TR_MAIN_PARTIES)
+        word = replace_user_in_dict(remove_full_stop_and_commas(word), TR_MAIN_PARTIES, remove_word=False)
         if "@" in word:
             # replace twitter usernames by party or politician names
             word = remove_full_stop_and_commas(remove_at_sign(word)).lower()
-            word = replace_twitter_users(word, mention_replaces)
+            word = replace_user_in_dict(word, mention_replaces, remove_word=True)
         if "#" in word:
             word = parse_hashtag_func(word)
         if word:
@@ -87,22 +87,15 @@ def parse_tweet(tweet, parse_hashtag_func, mention_replaces):
     return " ".join(parsed_tweet)
 
 
-def replace_twitter_users(text, replace_dict):
+def replace_user_in_dict(word, replace_dict, remove_word=True):
     """
-    :param text: Twitter username without @
+    :param word: Tweet word
     :param replace_dict: Politics and parties dict
+    :param remove_word: True if the word is removed when not found in dictionary
     :return: Parsed politic or empty string if politic not found
     """
-    return replace_dict.get(text, '')
-
-
-def replace_party(word, replace_dict):
-    """
-    :param word: Any tweet word
-    :param replace_dict: Dictionary of parties
-    :return: Parsed party or original word if word is not a party
-    """
-    return replace_dict.get(word, word)
+    replace = '' if remove_word else word
+    return replace_dict.get(word, replace)
 
 
 def is_spanish(text):
