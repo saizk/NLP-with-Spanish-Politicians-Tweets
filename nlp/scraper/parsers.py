@@ -6,7 +6,7 @@ from langdetect import detect, DetectorFactory
 from multiprocessing import cpu_count
 from concurrent.futures import ProcessPoolExecutor
 
-from .models import get_politics_twitter_dict
+from .models import get_politicians_twitter_dict
 from .parties import PARTIES_TWITTERS, TR_MAIN_PARTIES
 from .util import traverse_dict
 
@@ -17,17 +17,17 @@ def wiki_parser():
     table = soup.find("table", {"class": "wikitable sortable"})
     df = pd.DataFrame(pd.read_html(str(table))[0])
 
-    politics_names = df.get("Nombre y apellidos").to_list()
-    for idx, pol in enumerate(politics_names):
+    politician_names = df.get("Nombre y apellidos").to_list()
+    for idx, pol in enumerate(politician_names):
         surname, name = pol.split(",")
-        politics_names[idx] = f"{name} {surname}".strip()
+        politician_names[idx] = f"{name} {surname}".strip()
 
     parties = df.get("Lista.1").to_list()
 
-    politics = list(zip(politics_names, parties))
+    politicians = list(zip(politician_names, parties))
     parties = set(parties)
 
-    return politics, parties
+    return politicians, parties
 
 
 def tweets_parser(df, parameters: dict, session):
@@ -63,9 +63,9 @@ def tweets_parser(df, parameters: dict, session):
 def parse_tweet(tweet, parse_hashtag_func, mention_replaces):
     """
     Parallelized function called by ProcessPoolExecutor for parsing tweets
-    :param tweet: Politic tweet
+    :param tweet: Politician tweet
     :param parse_hashtag_func: Hashtag parsing function
-    :param mention_replaces: Labels dictionary for substituting parties and/or politics
+    :param mention_replaces: Labels dictionary for substituting parties and/or politicians
     :return: Parsed tweet
     """
     tweet = remove_urls(tweet)
@@ -90,9 +90,9 @@ def parse_tweet(tweet, parse_hashtag_func, mention_replaces):
 def replace_user_in_dict(word, replace_dict, remove_word=True):
     """
     :param word: Tweet word
-    :param replace_dict: Politics and parties dict
+    :param replace_dict: Politicians and parties dict
     :param remove_word: True if the word is removed when not found in dictionary
-    :return: Parsed politic or empty string if politic not found
+    :return: Parsed politician or empty string if politician not found
     """
     replace = '' if remove_word else word
     return replace_dict.get(word, replace)
@@ -110,15 +110,15 @@ def is_spanish(text):
 def set_parameters(session, parameters: dict):
     """
     :param session: SQLAlchemy session
-    :param parameters: Dictionary of parameters for the hashtag parsing and party/politic substitution
+    :param parameters: Dictionary of parameters for the hashtag parsing and party/politician substitution
     :return: Hashtag parsing function and labels dictionary
     """
-    politics_twitters = get_politics_twitter_dict(session)
+    politicians_twitters = get_politicians_twitter_dict(session)
     parse_hashtag_func = remove_hashtag_word if parameters["remove_hashtag_word"] else remove_hashtag
 
     labels_dict = {}
-    if parameters["replace_politics"]:
-        labels_dict.update(politics_twitters)
+    if parameters["replace_politicians"]:
+        labels_dict.update(politicians_twitters)
     if parameters["replace_parties"]:
         labels_dict.update(PARTIES_TWITTERS)
 
