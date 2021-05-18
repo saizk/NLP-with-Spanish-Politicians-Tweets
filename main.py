@@ -15,7 +15,7 @@ from pprint import pprint
 # ACCESS_TOKEN_KEY = os.environ.get("ACCESS_TOKEN_KEY")
 
 
-def create_politics(db, politics, bot):
+def create_politicians(db, politics, bot):
     for idx, (pol, party) in enumerate(politics):
         twitter = bot.get_twitter_by_name(pol)
         print(f"{idx + 1}: {pol} -> {twitter}")
@@ -40,9 +40,9 @@ def create_tweets(db, twitters, bot, last_n_months=1):
 
 
 def create_database(db, twitter_bot: Twitter, politics: list):
-    create_politics(db, politics, twitter_bot)
+    create_politicians(db, politics, twitter_bot)
     create_parties(db, PARTIES_TWITTERS)
-    twitters = list(models.get_politics_twitter_dict(db).keys())
+    twitters = list(models.get_politicians_twitter_dict(db).keys())
     create_tweets(db, twitters, twitter_bot)
 
 
@@ -72,26 +72,26 @@ def nlp_pipeline_result(parser_parameters: dict = None, nlp_parameters: dict = N
 
 def main():
     session, engine = models.init_db("sqlite:///example.db")
-    politics, parties = wiki_parser()
+    politicians, parties = wiki_parser()
     bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
-    # pprint(politics)
-    print(f"Number of politics in the Congress: {len(politics)}")  # 350
+    # pprint(politicians)
+    print(f"Number of politicians in the Congress: {len(politicians)}")  # 350
     # pprint(parties)
     print(f"Number of political parties: {len(parties)}")  # 24
 
-    # create_database(session, bot, politics)
-    print(f"Number of politics with Twitter: {session.query(models.Politic.twitter).distinct().count()}")  # 293
+    # create_database(session, bot, politicians)
+    print(f"Number of politicians with Twitter: {session.query(models.Politic.twitter).distinct().count()}")  # 293
 
     raw_tweets_df = get_raw_tweets_df(engine)
     # print(raw_tweets_df)
-    print(f"Number of tweets of the politics during the last month: {len(raw_tweets_df.text)}")  # 18206
+    print(f"Number of tweets of the politicians during the last month: {len(raw_tweets_df.text)}")  # 18206
 
     print("Parsing incorrect and non-Spanish tweets ...")
     parsed_tweets_df = tweets_parser(
         raw_tweets_df,
         parameters={
             "remove_hashtag_word": True,
-            "replace_politics": True,
+            "replace_politicians": True,
             "replace_parties": True,
         },
         session=session,
