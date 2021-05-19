@@ -15,12 +15,12 @@ from pprint import pprint
 # ACCESS_TOKEN_KEY = os.environ.get("ACCESS_TOKEN_KEY")
 
 
-def create_politicians(db, politics, bot):
-    for idx, (pol, party) in enumerate(politics):
+def create_politicians(db, politicians, bot):
+    for idx, (pol, party) in enumerate(politicians):
         twitter = bot.get_twitter_by_name(pol)
         print(f"{idx + 1}: {pol} -> {twitter}")
         with db.begin():
-            models.create_politic(db, pol, party, twitter)
+            models.create_politician(db, pol, party, twitter)
 
 
 def create_parties(db, parties):
@@ -32,6 +32,7 @@ def create_parties(db, parties):
 
 def create_tweets(db, twitters, bot, last_n_months=1):
     for idx, twitter in enumerate(twitters):
+        print(twitter)
         tweets = bot.get_tweets_by_user(user=twitter, last_n_months=last_n_months)
         print(f"{idx + 1}: {twitter} -> {len(tweets)} tweets")
         for tweet in tweets:
@@ -39,17 +40,17 @@ def create_tweets(db, twitters, bot, last_n_months=1):
         db.commit()
 
 
-def create_database(db, twitter_bot: Twitter, politics: list):
-    create_politicians(db, politics, twitter_bot)
+def create_database(db, twitter_bot: Twitter, politicians: list):
+    create_politicians(db, politicians, twitter_bot)
     create_parties(db, PARTIES_TWITTERS)
-    twitters = list(models.get_politicians_twitter_dict(db).keys())
+    twitters = list(models.get_politicians_twitter_dict(db).values())
     create_tweets(db, twitters, twitter_bot)
 
 
 def get_raw_tweets_df(engine):
-    politics, _ = wiki_parser()
+    politicians, _ = wiki_parser()
     tweets_df = pd.read_sql_table("tweet", con=engine)
-    tweets_df["author"] = [politics[i-1][0] for i in tweets_df["author_id"]]
+    tweets_df["author"] = [politicians[i-1][0] for i in tweets_df["author_id"]]
     return tweets_df
 
 
@@ -71,7 +72,7 @@ def nlp_pipeline_result(parser_parameters: dict = None, nlp_parameters: dict = N
 
 
 def main():
-    session, engine = models.init_db("sqlite:///example.db")
+    session, engine = models.init_db("sqlite:///example2.db")
     politicians, parties = wiki_parser()
     bot = Twitter(API_KEY, API_SECRET_KEY, ACCESS_TOKEN, ACCESS_TOKEN_KEY)
     # pprint(politicians)
@@ -79,8 +80,8 @@ def main():
     # pprint(parties)
     print(f"Number of political parties: {len(parties)}")  # 24
 
-    # create_database(session, bot, politicians)
-    print(f"Number of politicians with Twitter: {session.query(models.Politic.twitter).distinct().count()}")  # 293
+    # create_database(session, bot, politicians)  # FUNCTION TO CREATE THE DATASET
+    print(f"Number of politicians with Twitter: {session.query(models.Politician.twitter).distinct().count()}")  # 293
 
     raw_tweets_df = get_raw_tweets_df(engine)
     # print(raw_tweets_df)
